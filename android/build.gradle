@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:3.5.0'
     }
 }
 
@@ -17,7 +17,7 @@ rootProject.allprojects {
         google()
         jcenter()
         flatDir {
-            dirs 'libs'
+            dirs project(':baidu_face_detect').file('libs')
         }
     }
 }
@@ -37,7 +37,8 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.aar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation(name: 'faceplatform-release', ext: 'aar')
     implementation 'androidx.appcompat:appcompat:1.0.2'
 }
 
