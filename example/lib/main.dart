@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -16,6 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   String? callBack;
+  bool? hasPermission;
 
   @override
   void initState() {
@@ -34,6 +37,8 @@ class _MyAppState extends State<MyApp> {
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
+    // actions:Eye,HeadRight,HeadRight,HeadLeft,HeadUp,HeadDown
+    BaiduFaceDetect.addLiveAction(["Eye", "Mouth", "HeadRight"]);
     BaiduFaceDetect.init("kdqb-demo-face-android", "idl-license.face-android");
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -55,7 +60,15 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Column(
             children: <Widget>[
-              Text('Running on: ${callBack}'),
+              callBack!=null?Image.memory(Base64Decoder().convert(callBack!), width: 150,):Text("暂无获取"),
+              Text("是否已经获取权限${hasPermission}"),
+              TextButton(onPressed: (){
+                BaiduFaceDetect.requestPermissions().then((value){
+                  setState(() {
+                    hasPermission = value;
+                  });
+                });
+              }, child: Text("获取权限")),
               FlatButton(
                 child: Text('活体检测'),
                 onPressed: () {

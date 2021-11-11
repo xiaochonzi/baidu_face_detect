@@ -10,6 +10,7 @@ import com.baidu.idl.face.platform.FaceStatusNewEnum;
 import com.baidu.idl.face.platform.model.ImageInfo;
 import com.baidu.idl.face.platform.ui.FaceDetectActivity;
 import com.baidu.idl.face.platform.ui.utils.IntentUtils;
+import com.baidu.idl.face.platform.ui.utils.PermissionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -23,6 +23,7 @@ import com.baidu.idl.face.platform.utils.DensityUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -50,10 +51,7 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
     channel.setMethodCallHandler(this);
     mContext = flutterPluginBinding.getApplicationContext();
 
-    Application.livenessList.clear();
-    Application.livenessList.add(LivenessTypeEnum.Eye);
-    Application.livenessList.add(LivenessTypeEnum.Mouth);
-    Application.livenessList.add(LivenessTypeEnum.HeadRight);
+
   }
 
   @Override
@@ -69,9 +67,33 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
     }else if(call.method.equals("detect")){
       mResult = result;
       detect();
+    }else if(call.method.equals("requestPermissions")){
+      mResult = result;
+      requestPermissions();
+    }else if(call.method.equals("addLiveAction")){
+      List<String> actionNames = call.argument("actions");
+      addLiveAction(actionNames);
     }else {
       result.notImplemented();
     }
+  }
+
+  private void addLiveAction(List<String> actionNames) {
+    if(actionNames==null || actionNames.isEmpty()){
+      return;
+    }else{
+      Application.livenessList.clear();
+      for (String actionName:actionNames){
+        LivenessTypeEnum type = LivenessTypeEnum.valueOf(actionName);
+        if(type!=null){
+          Application.livenessList.add(type);
+        }
+      }
+    }
+  }
+
+  private void requestPermissions() {
+    requestPermissions(99);
   }
 
   /**
@@ -92,15 +114,26 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
     FaceSDKManager.getInstance().initialize(mContext, licenseId, licenseFileName, new IInitCallback() {
               @Override
               public void initSuccess() {
-                Log.i(TAG, "initSuccess");
-                mIsInitSuccess = true;
-                mResult.success(true);
+                activity.runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                    Log.i(TAG, "init Baidu Face Detect sdk Success");
+                    mIsInitSuccess = true;
+                    mResult.success(true);
+                  }
+                });
+
               }
               @Override
               public void initFailure(final int errCode, final String errMsg) {
-                Log.i(TAG, "initFailure: "+errMsg);
-                mIsInitSuccess = false;
-                mResult.success(false);
+               activity.runOnUiThread(new Runnable() {
+                 @Override
+                 public void run() {
+                   Log.i(TAG, "initFailure: "+errMsg);
+                   mIsInitSuccess = false;
+                   mResult.success(false);
+                 }
+               });
               }
             });
   }
@@ -110,7 +143,6 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
    */
   private void detect() {
     if(mIsInitSuccess){
-      requestPermissions(99);
       Intent intent = new Intent(mContext, FaceDetectExpActivity.class);
       activity.startActivityForResult(intent, REQUEST_CODE_DETECT);
     }
@@ -121,7 +153,6 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
    */
   private void liveness() {
     if(mIsInitSuccess){
-      requestPermissions(99);
       Intent intent = new Intent(mContext, FaceLivenessExpActivity.class);
       activity.startActivityForResult(intent, REQUEST_CODE_DETECT);
     }
@@ -154,6 +185,7 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
     activity = binding.getActivity();
     binding.addActivityResultListener(this);
+    binding.addRequestPermissionsResultListener(this);
   }
 
   @Override
@@ -163,6 +195,7 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
   @Override
   public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
     binding.removeActivityResultListener(this);
+    binding.removeRequestPermissionsResultListener(this);
   }
 
   @Override
@@ -178,6 +211,7 @@ public class BaiduFaceDetectPlugin implements FlutterPlugin, MethodCallHandler, 
         flag = true;
       }
     }
+    mResult.success(flag);
     return flag;
   }
 

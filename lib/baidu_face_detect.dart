@@ -16,6 +16,15 @@ class BaiduFaceDetect {
     await _channel.invokeMethod("initSDK", {"licenseId":licenseId, "licenseFileName":licenseFileName});
   }
 
+  static Future<bool?> requestPermissions() async {
+    final bool? result = await _channel.invokeMethod("requestPermissions");
+    return result;
+  }
+
+  static Future addLiveAction(List<String> actionNames)async{
+    await _channel.invokeMethod("addLiveAction", {"actions":actionNames});
+  }
+
   static Future<LivenessResult> liveness() async {
     Map<dynamic, dynamic> map = await _channel.invokeMethod('liveness');
     return LivenessResult.fromMap(map);
@@ -25,6 +34,8 @@ class BaiduFaceDetect {
     Map<dynamic, dynamic> map = await _channel.invokeMethod('detect');
     return DetectResult.fromMap(map);
   }
+
+
 
 }
 

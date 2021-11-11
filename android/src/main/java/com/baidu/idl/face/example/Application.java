@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
 
+import androidx.collection.ArraySet;
+
 import com.baidu.idl.face.example.manager.QualityConfigManager;
 import com.baidu.idl.face.example.model.Const;
 import com.baidu.idl.face.example.model.QualityConfig;
@@ -21,7 +23,7 @@ import java.util.Set;
 
 public class Application {
     // 动作活体条目集合
-    public static List<LivenessTypeEnum> livenessList = new ArrayList<>();
+    public static Set<LivenessTypeEnum> livenessList = new ArraySet<>();
     // 活体随机开关
     public static boolean isLivenessRandom = true;
     // 语音播报开关
@@ -30,26 +32,7 @@ public class Application {
     public static boolean isActionLive = true;
     // 质量等级（0：正常、1：宽松、2：严格、3：自定义）
     public static int qualityLevel = Const.QUALITY_NORMAL;
-
-    private static Map<String, Activity> destroyMap = new HashMap<>();
-
-    /**
-     * 添加到销毁队列
-     * @param activity 要销毁的activity
-     */
-    public static void addDestroyActivity(Activity activity, String activityName) {
-        destroyMap.put(activityName, activity);
-    }
-
-    /**
-     * 销毁指定Activity
-     */
-    public static void destroyActivity(String activityName) {
-        Set<String> keySet = destroyMap.keySet();
-        for (String key : keySet) {
-            destroyMap.get(key).finish();
-        }
-    }
+    
 
     /**
      * 参数配置方法
@@ -106,7 +89,17 @@ public class Application {
         // 设置活体动作，通过设置list，LivenessTypeEunm.Eye, LivenessTypeEunm.Mouth,
         // LivenessTypeEunm.HeadUp, LivenessTypeEunm.HeadDown, LivenessTypeEunm.HeadLeft,
         // LivenessTypeEunm.HeadRight
-        config.setLivenessTypeList(Application.livenessList);
+        // 
+        List<LivenessTypeEnum> livenessTypeEnumList = new ArrayList<>();
+        if(Application.livenessList.isEmpty()){
+            Application.livenessList.add(LivenessTypeEnum.Eye);
+            Application.livenessList.add(LivenessTypeEnum.Mouth);
+            Application.livenessList.add(LivenessTypeEnum.HeadRight);
+        }
+        for (LivenessTypeEnum type:Application.livenessList){
+            livenessTypeEnumList.add(type);
+        }
+        config.setLivenessTypeList(livenessTypeEnumList);
         // 设置动作活体是否随机
         config.setLivenessRandom(Application.isLivenessRandom);
         // 设置开启提示音
